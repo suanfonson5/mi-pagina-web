@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Llaves de Entrada MGA-C</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --navy:#1B2844;
+    --navy-dark:#121C33;
+    --gold:#FF7515;
+    --ink:#1B1F27;
+    --muted:#6B7280;
+    --line:#D9DEE6;
+    --row-alt:#F4F6FA;
+    --ok:#1E7B4D;
+    --ok-bg:#E5F4EC;
+    --bad:#B0271E;
+    --bad-bg:#FBE7E5;
+    --paper:#FFFFFF;
+    --bg:#EEF1F6;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#151A22; --bg:#0C0F14; --ink:#E7EAF0; --muted:#8B93A3;
+      --line:#2A313E; --row-alt:#1B212B; --ok-bg:#123324; --bad-bg:#3A1917;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#151A22; --bg:#0C0F14; --ink:#E7EAF0; --muted:#8B93A3;
+    --line:#2A313E; --row-alt:#1B212B; --ok-bg:#123324; --bad-bg:#3A1917;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    padding:28px 16px 60px;
+  }
+  .wrap{max-width:1180px;margin:0 auto;}
+
+  .logoBar{
+    background:#fff; border-radius:14px 14px 0 0; padding:16px 20px 10px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .logoBar img{ height:44px; width:auto; display:block; }
+
+  .dateBar{
+    background:var(--gold); color:#fff; font-weight:700; font-size:13px;
+    padding:9px 16px; letter-spacing:.2px;
+  }
+  .titleBar{
+    background:var(--navy); color:#fff; text-align:center; padding:14px 16px;
+    font-size:17px; font-weight:700; letter-spacing:.3px;
+  }
+  .subtitle{
+    background:var(--navy-dark); color:#C9D3E4; text-align:center;
+    padding:6px 16px 10px; font-size:12.5px; border-radius:0 0 10px 10px;
+  }
+
+  .summaryBar{ display:flex; gap:14px; flex-wrap:wrap; margin:18px 0; }
+  .summaryCard{
+    flex:1; min-width:150px; background:var(--paper); border-radius:10px;
+    padding:14px 16px; box-shadow:0 1px 3px rgba(0,0,0,.08);
+  }
+  .summaryCard .num{font-size:22px;font-weight:800;color:var(--navy);}
+  :root[data-theme="dark"] .summaryCard .num{color:#8FB3E0;}
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .summaryCard .num{color:#8FB3E0;} }
+  .summaryCard .lbl{font-size:11.5px;color:var(--muted);margin-top:2px;}
+
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(330px,1fr)); gap:16px; }
+
+  .card{
+    background:var(--paper); border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,.08);
+    overflow:hidden; display:flex; flex-direction:column;
+  }
+  .card-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 16px; background:var(--navy); color:#fff;
+  }
+  .card-head .store{font-weight:800; font-size:15px;}
+  .pill{ display:inline-block; padding:4px 10px; border-radius:20px; font-size:12.5px; font-weight:700; }
+  .pill.high{background:var(--ok-bg);color:var(--ok);}
+  .pill.mid{background:#FFF3D6;color:#8A6100;}
+  .pill.low{background:var(--bad-bg);color:var(--bad);}
+
+  .photo-thumb{
+    position:relative; width:64px; height:64px; border-radius:8px; overflow:hidden;
+    border:1px solid var(--line); background:var(--row-alt); flex-shrink:0;
+  }
+  .photo-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .photo-thumb .del{
+    position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%;
+    background:rgba(0,0,0,.55); color:#fff; border:none; font-size:11px; line-height:1;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .upload-btn{
+    width:64px; height:64px; border-radius:8px; border:1.5px dashed var(--line);
+    background:none; color:var(--muted); font-size:22px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .upload-btn:hover{ border-color:var(--navy); color:var(--navy); }
+  .upload-btn:disabled{ opacity:.4; cursor:default; }
+  input[type="file"]{ display:none; }
+
+  .points-section{ padding:4px 12px 10px; flex:1; }
+  .point-row{
+    display:flex; align-items:center; gap:8px; padding:8px 2px; border-bottom:1px solid var(--line);
+  }
+  .point-row:last-child{ border-bottom:none; }
+  .point-name{ flex:1; font-size:11.5px; font-weight:700; color:var(--ink); line-height:1.25; }
+  .point-photos{ display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
+  .photo-thumb.small, .upload-btn.small{ width:34px; height:34px; border-radius:6px; }
+  .photo-thumb.small .del{ width:14px; height:14px; font-size:9px; }
+  .upload-btn.small{ font-size:17px; }
+
+  .point-mark-btn{
+    width:28px; height:28px; flex-shrink:0; border-radius:7px; border:1px solid var(--line);
+    background:none; font-weight:800; font-size:13px; color:var(--muted); cursor:pointer;
+  }
+  .point-mark-btn.state-ok{ background:var(--ok-bg); border-color:var(--ok); color:var(--ok); }
+  .point-mark-btn.state-bad{ background:var(--bad-bg); border-color:var(--bad); color:var(--bad); }
+  .upload-pending{ font-size:10.5px; color:var(--muted); font-style:italic; }
+
+  .dashboardWrap{ max-width:900px; margin:16px auto 0; }
+  .dashSummary{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:16px; }
+  .dashSection{
+    background:var(--paper); border-radius:12px; padding:18px 20px; margin-bottom:16px;
+    box-shadow:0 1px 3px rgba(0,0,0,.08);
+  }
+  .dashSectionTitle{ font-weight:800; color:var(--navy); font-size:14px; margin-bottom:16px; }
+  :root[data-theme="dark"] .dashSectionTitle{ color:#8FB3E0; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .dashSectionTitle{ color:#8FB3E0; } }
+  .dashBarRow{ display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .dashBarLabel{ width:70px; font-weight:800; font-size:12.5px; color:var(--navy); flex-shrink:0; }
+  :root[data-theme="dark"] .dashBarLabel{ color:#8FB3E0; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .dashBarLabel{ color:#8FB3E0; } }
+  .dashBarTrack{ flex:1; height:16px; background:var(--row-alt); border-radius:8px; overflow:hidden; }
+  .dashBarFill{ height:100%; border-radius:8px; transition:width .3s ease; }
+  .dashBarPct{ width:42px; text-align:right; font-weight:800; font-size:12.5px; flex-shrink:0; color:var(--ink); }
+
+  .dashHeatmap{ overflow-x:auto; }
+  table.dashHeatTable{ border-collapse:collapse; width:100%; min-width:640px; }
+  table.dashHeatTable th{
+    font-size:10.5px; color:var(--muted); font-weight:700; padding:4px 6px; text-align:center;
+  }
+  table.dashHeatTable th:first-child{ text-align:left; }
+  table.dashHeatTable td{ text-align:center; padding:0; }
+  table.dashHeatTable td.dashStoreLabel{
+    text-align:left; font-size:12px; font-weight:800; color:var(--navy); padding:4px 8px 4px 0;
+    white-space:nowrap;
+  }
+  :root[data-theme="dark"] table.dashHeatTable td.dashStoreLabel{ color:#8FB3E0; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) table.dashHeatTable td.dashStoreLabel{ color:#8FB3E0; } }
+  .heatCell{
+    display:flex; align-items:center; justify-content:center; height:30px; margin:2px;
+    border-radius:6px; font-size:10px; font-weight:800; color:#fff;
+  }
+  .heatCell.none{ background:var(--row-alt); color:var(--muted); font-weight:600; }
+
+  .status-note{ padding:8px 16px 14px; font-size:11.5px; color:var(--muted); }
+  .status-note.err{ color:var(--bad); }
+
+  .topNote{
+    font-size:12.5px; color:var(--muted); background:var(--paper); border-radius:10px;
+    padding:10px 14px; margin-bottom:16px; box-shadow:0 1px 3px rgba(0,0,0,.08);
+  }
+
+  .shareCard{
+    display:flex; gap:16px; align-items:center; flex-wrap:wrap;
+    background:var(--paper); border-radius:12px; padding:16px;
+    margin:16px 0; box-shadow:0 1px 3px rgba(0,0,0,.08);
+  }
+  .qrBox{
+    width:160px; height:160px; flex-shrink:0; display:flex; align-items:center;
+    justify-content:center; background:#fff; border-radius:8px; border:1px solid var(--line);
+  }
+  .shareInfo{ flex:1; min-width:200px; }
+  .shareTitle{ font-weight:800; font-size:15px; color:var(--navy); margin-bottom:4px; }
+  :root[data-theme="dark"] .shareTitle{ color:#8FB3E0; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .shareTitle{ color:#8FB3E0; } }
+  .shareText{ font-size:12.5px; color:var(--muted); margin-bottom:8px; }
+  .shareUrl{
+    font-size:12px; color:var(--ink); background:var(--row-alt); border-radius:6px;
+    padding:6px 10px; word-break:break-all; margin-bottom:10px;
+  }
+  .shareBtns{ display:flex; gap:8px; flex-wrap:wrap; }
+  .shareBtn{
+    font-size:12.5px; border:1px solid var(--line); background:none; color:var(--ink);
+    border-radius:8px; padding:7px 14px; cursor:pointer;
+  }
+  .shareBtn:hover{ border-color:var(--navy); }
+
+  .guideBtnWrap{ margin:16px 0 0; }
+  .guideBtn{
+    width:100%; text-align:left; font-size:13px; font-weight:700; color:var(--navy);
+    background:var(--paper); border:1px solid var(--line); border-radius:10px;
+    padding:12px 16px; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,.08);
+  }
+  :root[data-theme="dark"] .guideBtn{ color:#8FB3E0; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .guideBtn{ color:#8FB3E0; } }
+  .guideBtn:hover{ border-color:var(--navy); }
+
+  .modalOverlay{
+    display:none; position:fixed; inset:0; background:rgba(10,14,20,.55);
+    align-items:center; justify-content:center; padding:20px; z-index:50;
+  }
+  .modalOverlay.open{ display:flex; }
+  .modalBox{
+    background:var(--paper); border-radius:14px; max-width:640px; width:100%;
+    max-height:82vh; display:flex; flex-direction:column; overflow:hidden;
+    box-shadow:0 8px 30px rgba(0,0,0,.25);
+  }
+  .modalHead{
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--navy); color:#fff; padding:14px 18px; font-weight:800; font-size:15px;
+  }
+  .modalClose{ background:none; border:none; color:#fff; font-size:16px; cursor:pointer; }
+  .modalBody{ overflow-y:auto; padding:6px 18px 18px; }
+  .guideItem{ padding:14px 0; border-bottom:1px solid var(--line); }
+  .guideItem:last-child{ border-bottom:none; }
+  .guideItem .gi-title{ font-weight:800; font-size:14px; color:var(--navy); margin-bottom:4px; }
+  :root[data-theme="dark"] .guideItem .gi-title{ color:#8FB3E0; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .guideItem .gi-title{ color:#8FB3E0; } }
+  .guideItem .gi-desc{ font-size:12.8px; color:var(--ink); line-height:1.5; }
+  .guideItem .gi-num{ display:inline-block; width:20px; color:var(--muted); font-weight:700; }
+
+  .viewToggle{ display:flex; gap:8px; margin:16px 0; }
+  .viewBtn{
+    font-size:12.5px; font-weight:700; border:1px solid var(--line); background:var(--paper);
+    color:var(--muted); border-radius:8px; padding:8px 14px; cursor:pointer;
+  }
+  .viewBtn.active{ background:var(--navy); border-color:var(--navy); color:#fff; }
+
+  .tableWrap{
+    background:var(--paper); border-radius:12px; overflow:hidden; margin-bottom:20px;
+    box-shadow:0 1px 3px rgba(0,0,0,.08);
+  }
+  .tablesRow{ display:flex; gap:16px; flex-wrap:wrap; align-items:flex-start; }
+  .tablesRow .tableWrap{ flex:1; min-width:340px; margin-bottom:0; }
+
+  .editLockRow{
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    margin:0 0 14px;
+  }
+  .editLockBtn{
+    font-size:12.5px; font-weight:700; border:1px solid var(--line); background:var(--paper);
+    color:var(--ink); border-radius:8px; padding:9px 16px; cursor:pointer;
+  }
+  .editLockBtn.unlocked{ background:var(--ok-bg); border-color:var(--ok); color:var(--ok); }
+  .editLockHint{ font-size:12px; color:var(--muted); }
+  .tablesRow.locked .sheetCell-btn,
+  .tablesRow.locked td.weekCell{ cursor:default; }
+  .tablesRow.locked{ opacity:.92; }
+  .tableDateBar{
+    background:#FFF6D6; color:#7A5B00; font-weight:700; font-size:12.5px;
+    padding:8px 14px; border-bottom:1px solid var(--line);
+  }
+  .tableTitleBar{
+    background:var(--navy); color:#fff; text-align:center; font-weight:800;
+    font-size:14px; padding:10px;
+  }
+  .tableScroll{ overflow-x:auto; }
+  table.sheetTable{ border-collapse:collapse; width:100%; min-width:900px; }
+  table.sheetTable thead th{
+    background:var(--navy); color:#fff; font-size:11px; font-weight:700;
+    padding:9px 8px; text-align:center; border-right:1px solid rgba(255,255,255,.15);
+    white-space:normal; line-height:1.2;
+  }
+  table.sheetTable thead th:first-child{ text-align:left; padding-left:14px; }
+  table.sheetTable tbody td{
+    text-align:center; font-size:12.5px; padding:0; border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line); color:var(--navy); font-weight:700;
+  }
+  table.sheetTable tbody td.sheetStore{
+    text-align:left; padding:9px 14px; background:var(--row-alt); font-weight:800;
+  }
+  table.sheetTable tbody td.sheetCompliance{ background:var(--row-alt); }
+  .sheetCell-btn{
+    width:100%; height:36px; border:none; background:none; cursor:pointer;
+    font-weight:700; color:var(--navy); font-size:12.5px;
+  }
+  .sheetCell-btn.is-bad{ color:var(--bad); }
+  .sheetCell-btn:hover{ background:var(--row-alt); }
+
+  .sheetCell-input, .weekCell-input{
+    width:100%; height:36px; border:none; background:none; text-align:center;
+    font-weight:700; font-size:12.5px; font-family:inherit; color:inherit;
+    padding:0 4px;
+  }
+  .sheetCell-input{ color:var(--navy); }
+  .sheetCell-input:disabled, .weekCell-input:disabled{ opacity:1; cursor:default; }
+  .sheetCell-input:not(:disabled), .weekCell-input:not(:disabled){
+    background:#FFFDF2; cursor:text; color:var(--navy);
+  }
+  .sheetCell-input:not(:disabled):focus, .weekCell-input:not(:disabled):focus{
+    outline:2px solid var(--gold); outline-offset:-2px; background:#fff; color:var(--navy);
+  }
+  .sheetCell-input.is-ok{ background:var(--ok-bg); color:var(--ok); }
+  .sheetCell-input.is-bad{ background:var(--bad-bg); color:var(--bad); }
+
+  td.weekCell{ font-weight:800; font-size:12.5px; }
+  td.weekCell.empty{ background:var(--bad-bg); color:var(--bad); }
+  td.weekCell.has-data{ background:var(--ok-bg); color:var(--ok); }
+  td.weekCompliance.empty{ background:var(--bad-bg); color:var(--bad); font-weight:800; }
+  td.weekCompliance.has-data{ background:var(--ok-bg); color:var(--ok); font-weight:800; }
+
+  body.upload-only .point-mark-btn{ display:none; }
+  body.upload-only .pill{ display:none; }
+  body.upload-only .card-head{ justify-content:center; }
+
+  .storeSelectWrap{
+    background:var(--paper); border-radius:14px; padding:28px 20px; margin:16px 0;
+    box-shadow:0 1px 3px rgba(0,0,0,.08); text-align:center;
+  }
+  .storeSelectTitle{ font-size:17px; font-weight:800; color:var(--navy); margin-bottom:18px; }
+  :root[data-theme="dark"] .storeSelectTitle{ color:#8FB3E0; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .storeSelectTitle{ color:#8FB3E0; } }
+  .storeSelectGrid{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px;
+  }
+  .storeSelectBtn{
+    padding:16px 8px; border-radius:10px; border:1.5px solid var(--line); background:var(--row-alt);
+    color:var(--navy); font-weight:800; font-size:14px; cursor:pointer;
+  }
+  :root[data-theme="dark"] .storeSelectBtn{ color:#8FB3E0; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .storeSelectBtn{ color:#8FB3E0; } }
+  .storeSelectBtn:hover{ border-color:var(--navy); background:var(--paper); }
+
+  .changeStoreBtn{
+    font-size:12.5px; font-weight:700; color:var(--navy); background:var(--paper);
+    border:1px solid var(--line); border-radius:8px; padding:8px 14px; cursor:pointer;
+    margin-bottom:12px;
+  }
+  :root[data-theme="dark"] .changeStoreBtn{ color:#8FB3E0; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .changeStoreBtn{ color:#8FB3E0; } }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="logoBar"><img src="/_blob/4e9ada6ea937f4c8dc0290bc470deda4" alt="am:pm"></div>
+  <div class="dateBar" id="dateBar"></div>
+  <div class="titleBar">Llaves de Entrada MGA-C</div>
+  <div class="subtitle" id="subtitle">Sube la foto de cada punto — al subirla, se marca como cumple automáticamente</div>
+
+  <div class="guideBtnWrap">
+    <button class="guideBtn" id="guideBtn" type="button">📋 Ver guía: cómo debe verse cada foto</button>
+  </div>
+
+  <div class="shareCard" id="shareCard">
+    <div class="qrBox" id="qrcode"></div>
+    <div class="shareInfo">
+      <div class="shareTitle">Escanea para subir fotos</div>
+      <div class="shareText">Comparte este código con las tiendas para que suban sus fotos directamente aquí.</div>
+      <div class="shareUrl" id="shareUrl"></div>
+      <div class="shareBtns">
+        <button class="shareBtn" id="copyBtn" type="button">Copiar enlace</button>
+        <button class="shareBtn" id="downloadQrBtn" type="button">Descargar QR</button>
+      </div>
+      <div class="shareText" style="margin-top:12px;">
+        Dashboard de solo lectura (cumplimiento en vivo, sin edición):
+        <a href="#" id="dashboardLink" style="color:var(--navy); font-weight:700;">abrir</a>
+        · <button class="shareBtn" id="copyDashboardBtn" type="button" style="padding:4px 10px; margin-left:4px;">Copiar</button>
+      </div>
+      <div class="shareText" style="margin-top:12px;">
+        <button class="shareBtn" id="emailReportBtn" type="button">📧 Enviar reporte por correo</button>
+        <span id="emailReportHint" style="display:block; margin-top:6px; font-size:12px; color:var(--muted);">Abre tu app de correo con el reporte de cumplimiento ya redactado para Cristina Maldonado — revísalo y dale enviar ahí.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="summaryBar" id="summaryBar" style="margin-top:16px;"></div>
+  <div class="topNote" id="topNote">Cargando…</div>
+
+  <div class="viewToggle" id="viewToggle">
+    <button class="viewBtn active" id="viewCardsBtn" type="button">🗂️ Vista tarjetas</button>
+    <button class="viewBtn" id="viewTableBtn" type="button">📊 Vista tabla</button>
+    <button class="viewBtn" id="viewWeeklyBtn" type="button">📆 Cumplimiento semanal</button>
+    <button class="viewBtn" id="viewBothBtn" type="button">📄 Ambas tablas juntas</button>
+  </div>
+
+  <div class="storeSelectWrap" id="storeSelectWrap" style="display:none;">
+    <div class="storeSelectTitle">¿Cuál es tu tienda?</div>
+    <div class="storeSelectGrid" id="storeSelectGrid"></div>
+  </div>
+
+  <button class="changeStoreBtn" id="changeStoreBtn" type="button" style="display:none;">🔁 Cambiar tienda</button>
+
+  <div class="grid" id="storeGrid"></div>
+
+  <div class="editLockRow" id="editLockRow" style="display:none;">
+    <button class="editLockBtn" id="editLockBtn" type="button">🔒 Activar edición manual</button>
+    <span class="editLockHint" id="editLockHint">Las tablas están bloqueadas — actívalo para poder escribir en las celdas.</span>
+  </div>
+
+  <div class="tablesRow" id="tablesRow" style="display:none;">
+    <div class="tableWrap" id="tableWrap">
+      <div class="tableDateBar" id="tableDateBar"></div>
+      <div class="tableTitleBar">Llaves de Entrada MGA-C</div>
+      <div class="tableScroll">
+        <table class="sheetTable" id="sheetTable">
+          <thead><tr id="sheetHead"></tr></thead>
+          <tbody id="sheetBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tableWrap" id="weeklyWrap">
+      <div class="tableTitleBar">Cumplimiento Llaves de Entrada MGA-C</div>
+      <div class="tableScroll">
+        <table class="sheetTable" id="weeklyTable">
+          <thead><tr id="weeklyHead"></tr></thead>
+          <tbody id="weeklyBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboardWrap" id="dashboardWrap" style="display:none;">
+    <div class="dashSummary" id="dashSummary"></div>
+    <div class="dashSection">
+      <div class="dashSectionTitle">Cumplimiento por tienda (hoy)</div>
+      <div class="dashBars" id="dashBars"></div>
+    </div>
+    <div class="dashSection">
+      <div class="dashSectionTitle">Cumplimiento semanal</div>
+      <div class="dashHeatmap" id="dashHeatmap"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modalOverlay" id="guideOverlay">
+  <div class="modalBox">
+    <div class="modalHead">
+      <span>Guía: cómo debe verse cada foto</span>
+      <button class="modalClose" id="guideClose" type="button">✕</button>
+    </div>
+    <div class="modalBody" id="guideBody"></div>
+  </div>
+</div>
+
+<script>
+const KEYS = [
+  "Inv. Marcas Propias","Inv. Panini","Semaforo Negro","Libro de Gerente","Roles",
+  "Video","App","Libro agente SAC","Arqueo SBF","Cierre de caja"
+];
+
+const KEY_GUIDE = {
+  "Inv. Marcas Propias": "Pantalla de Physical Inventory con Status en Closed, las 3 horas (Opened, Calculated, Closed) y el resumen/detalle del conteo visibles.",
+  "Inv. Panini": "Igual que Marcas Propias: Physical Inventory de PANINI con Status Closed, las 3 horas y el resumen (Expected / Over / Under) visibles.",
+  "Semaforo Negro": "Registro del turno con Status en Closed y las 3 horas (Opened, Calculated, Closed) legibles y consistentes con el día.",
+  "Libro de Gerente": "Pantalla \"Libro registrado\" de la revisión de cierre, con tienda, nombre del gerente, fecha del día y los puntos/resultados.",
+  "Roles": "Hoja de Control de Limpieza llenada con las iniciales de la persona responsable en cada franja de hora del día correspondiente, sin huecos grandes.",
+  "Video": "Recorrido en video caminando por toda la tienda: entrada, pasillos, piso y anaqueles, mostrando la tienda ordenada.",
+  "App": "Dos capturas de la app de inventario: 1) pantalla \"Inactivos\" con los productos bloqueados, 2) pantalla \"Activos\" con los productos desbloqueados.",
+  "Libro agente SAC": "Pantalla \"Entrega registrada\" con fecha, turno, quién recibió, resultado en Sí/No (idealmente 0 en No) y la cantidad de fotos adjuntas.",
+  "Arqueo SBF": "Pantalla del resultado de conciliación (RMH) mostrando los servicios bancarios con su estado por fila (OK / diferencia) visible.",
+  "Cierre de caja": "Correo de \"Notificación de Cierre de Caja\" con el ZReport adjunto, y usuario, tienda, caja y hora del cierre legibles."
+};
+
+function buildGuideModal(){
+  const body = document.getElementById("guideBody");
+  body.innerHTML = "";
+  KEYS.forEach((k,i)=>{
+    const div = document.createElement("div");
+    div.className = "guideItem";
+    div.innerHTML = `<div class="gi-title"><span class="gi-num">${i+1}.</span>${k}</div><div class="gi-desc">${KEY_GUIDE[k]}</div>`;
+    body.appendChild(div);
+  });
+  document.getElementById("guideBtn").addEventListener("click", ()=>{
+    document.getElementById("guideOverlay").classList.add("open");
+  });
+  document.getElementById("guideClose").addEventListener("click", ()=>{
+    document.getElementById("guideOverlay").classList.remove("open");
+  });
+  document.getElementById("guideOverlay").addEventListener("click", (e)=>{
+    if(e.target.id === "guideOverlay") document.getElementById("guideOverlay").classList.remove("open");
+  });
+}
+
+const STORES = ["AMPM02","AMPM07","AMPM08","AMPM15","AMPM28","AMPM29","AMPM35","AMPM69"];
+const PAGE_URL = "https://claude.ai/artifact/783bSX5YQrEsQHkzVo7E36";
+const UPLOAD_URL = PAGE_URL + "?modo=subir";
+const DASHBOARD_URL = PAGE_URL + "?vista=dashboard";
+const isUploadOnly = new URLSearchParams(window.location.search).get("modo") === "subir";
+const isDashboardOnly = new URLSearchParams(window.location.search).get("vista") === "dashboard";
+
+let db = null, assets = null, userCap = null, downloadsCap = null;
+let canWrite = false;
+let canUpload = false;
+let assetsChecked = false;
+let editUnlocked = false;
+const state = {}; // store -> { marks:{}, photos:{}, history:{} }
+STORES.forEach(s => state[s] = { marks:{}, photos:{}, history:{} });
+
+const WEEKDAY_LABELS = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+
+function todayISO(){
+  const d = new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+
+function currentWeekDates(){
+  const d = new Date();
+  const dow = d.getDay(); // 0=Sun..6=Sat
+  const diffToMonday = dow === 0 ? -6 : 1 - dow;
+  const monday = new Date(d);
+  monday.setDate(d.getDate() + diffToMonday);
+  const dates = [];
+  for(let i=0;i<7;i++){
+    const dd = new Date(monday);
+    dd.setDate(monday.getDate()+i);
+    dates.push(dd.getFullYear()+"-"+String(dd.getMonth()+1).padStart(2,"0")+"-"+String(dd.getDate()).padStart(2,"0"));
+  }
+  return dates;
+}
+
+function setDate(){
+  const d = new Date();
+  const txt = d.toLocaleDateString("es-ES",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  document.getElementById("dateBar").textContent = txt.charAt(0).toUpperCase()+txt.slice(1);
+}
+
+function computeCompliance(store){
+  const marks = Object.values(state[store].marks || {});
+  const okCount = marks.filter(v => String(v).trim() === "1").length;
+  return Math.round((okCount/KEYS.length)*100);
+}
+function pillClass(pct){ if(pct===100) return "high"; if(pct>=60) return "mid"; return "low"; }
+
+function refreshSummary(){
+  const bar = document.getElementById("summaryBar");
+  bar.innerHTML = "";
+  const total = STORES.length;
+  const full = STORES.filter(s => computeCompliance(s)===100).length;
+  const withIssues = STORES.filter(s => Object.values(state[s].marks||{}).some(v=>String(v).trim()==="0")).length;
+  const withPhotos = STORES.filter(s => Object.values(state[s].photos||{}).some(arr=>arr && arr.length>0)).length;
+  const avg = Math.round(STORES.reduce((sum,s)=>sum+computeCompliance(s),0)/total);
+  [
+    {num:total, lbl:"Tiendas en el modelo"},
+    {num:withPhotos+" / "+total, lbl:"Con foto subida"},
+    {num:full+" / "+total, lbl:"Al 100% de cumplimiento"},
+    {num:withIssues, lbl:"Con alguna llave faltante"},
+    {num:avg+"%", lbl:"Cumplimiento promedio"}
+  ].forEach(c=>{
+    const div=document.createElement("div"); div.className="summaryCard";
+    div.innerHTML=`<div class="num">${c.num}</div><div class="lbl">${c.lbl}</div>`;
+    bar.appendChild(div);
+  });
+  renderDashboard();
+}
+
+function barColor(pct){
+  if(pct===100) return "var(--ok)";
+  if(pct>=60) return "#C98A00";
+  return "var(--bad)";
+}
+
+function renderDashboard(){
+  const dashSummary = document.getElementById("dashSummary");
+  if(!dashSummary) return;
+
+  const total = STORES.length;
+  const full = STORES.filter(s => computeCompliance(s)===100).length;
+  const withIssues = STORES.filter(s => Object.values(state[s].marks||{}).some(v=>String(v).trim()==="0")).length;
+  const avg = Math.round(STORES.reduce((sum,s)=>sum+computeCompliance(s),0)/total);
+  dashSummary.innerHTML = "";
+  [
+    {num:avg+"%", lbl:"Cumplimiento promedio"},
+    {num:full+" / "+total, lbl:"Tiendas al 100%"},
+    {num:withIssues, lbl:"Tiendas con llaves faltantes"}
+  ].forEach(c=>{
+    const div=document.createElement("div"); div.className="summaryCard";
+    div.innerHTML=`<div class="num">${c.num}</div><div class="lbl">${c.lbl}</div>`;
+    dashSummary.appendChild(div);
+  });
+
+  const dashBars = document.getElementById("dashBars");
+  dashBars.innerHTML = "";
+  STORES.slice().sort((a,b)=>computeCompliance(b)-computeCompliance(a)).forEach(store=>{
+    const pct = computeCompliance(store);
+    const row = document.createElement("div");
+    row.className = "dashBarRow";
+    row.innerHTML = `
+      <div class="dashBarLabel">${store}</div>
+      <div class="dashBarTrack"><div class="dashBarFill" style="width:${pct}%; background:${barColor(pct)};"></div></div>
+      <div class="dashBarPct">${pct}%</div>
+    `;
+    dashBars.appendChild(row);
+  });
+
+  const dashHeatmap = document.getElementById("dashHeatmap");
+  const dates = currentWeekDates();
+  let html = '<table class="dashHeatTable"><thead><tr><th></th>' +
+    WEEKDAY_LABELS.map(d=>`<th>${d.slice(0,3)}</th>`).join("") + "</tr></thead><tbody>";
+  STORES.forEach(store=>{
+    const history = state[store].history || {};
+    html += `<tr><td class="dashStoreLabel">${store}</td>`;
+    dates.forEach(dateISO=>{
+      const v = history[dateISO];
+      if(typeof v === "number"){
+        html += `<td><div class="heatCell" style="background:${barColor(v)};">${v}%</div></td>`;
+      }else{
+        html += `<td><div class="heatCell none">—</div></td>`;
+      }
+    });
+    html += "</tr>";
+  });
+  html += "</tbody></table>";
+  dashHeatmap.innerHTML = html;
+}
+
+function cardTemplate(store){
+  const div = document.createElement("div");
+  div.className = "card";
+  div.id = "card-"+store;
+  div.innerHTML = `
+    <div class="card-head">
+      <span class="store">${store}</span>
+      <span class="pill" id="pill-${store}">0%</span>
+    </div>
+    <div class="points-section" id="points-${store}"></div>
+    <div class="status-note" id="note-${store}"></div>
+  `;
+  return div;
+}
+
+function renderPoints(store){
+  const wrap = document.getElementById("points-"+store);
+  wrap.innerHTML = "";
+  KEYS.forEach((k,i)=>{
+    const row = document.createElement("div");
+    row.className = "point-row";
+
+    const nameEl = document.createElement("div");
+    nameEl.className = "point-name";
+    nameEl.textContent = k;
+    nameEl.title = KEY_GUIDE[k] || "";
+    row.appendChild(nameEl);
+
+    const photosEl = document.createElement("div");
+    photosEl.className = "point-photos";
+    const photos = (state[store].photos||{})[i] || [];
+    photos.forEach(p=>{
+      const t = document.createElement("div");
+      t.className = "photo-thumb small";
+      t.innerHTML = `<img src="${p.url}" alt="${k} - ${store}">`;
+      if(canUpload){
+        const del = document.createElement("button");
+        del.className = "del"; del.type = "button"; del.textContent = "×";
+        del.addEventListener("click", ()=>deletePhoto(store,i,p.id));
+        t.appendChild(del);
+      }
+      photosEl.appendChild(t);
+    });
+    if(canUpload){
+      const label = document.createElement("label");
+      label.className = "upload-btn small";
+      label.textContent = "+";
+      label.title = "Subir foto de " + k;
+      const input = document.createElement("input");
+      input.type = "file"; input.accept = "image/*";
+      input.addEventListener("change", (e)=>{
+        const f = e.target.files[0];
+        if(f) uploadPhoto(store, i, f);
+        e.target.value = "";
+      });
+      label.appendChild(input);
+      photosEl.appendChild(label);
+    }else if(!assetsChecked){
+      const pending = document.createElement("span");
+      pending.className = "upload-pending";
+      pending.textContent = "Cargando…";
+      photosEl.appendChild(pending);
+    }else{
+      const denied = document.createElement("span");
+      denied.className = "upload-pending";
+      denied.textContent = "Sin permiso para subir";
+      photosEl.appendChild(denied);
+    }
+    row.appendChild(photosEl);
+
+    const v = (state[store].marks||{})[i];
+    const isOk = String(v).trim()==="1";
+    const isBad = String(v).trim()==="0";
+    const markBtn = document.createElement("button");
+    markBtn.type = "button";
+    markBtn.className = "point-mark-btn" + (isOk?" state-ok":isBad?" state-bad":"");
+    markBtn.title = isOk ? "Cumple (marcado al subir la foto)" : "Toca para cambiar manualmente";
+    markBtn.textContent = isOk ? "✓" : isBad ? "✗" : (v ? String(v) : "—");
+    if(canWrite) markBtn.addEventListener("click", ()=>cycleMark(store,i));
+    else markBtn.disabled = true;
+    row.appendChild(markBtn);
+
+    wrap.appendChild(row);
+  });
+}
+
+function refreshCard(store){
+  const pct = computeCompliance(store);
+  const pill = document.getElementById("pill-"+store);
+  pill.textContent = pct+"%";
+  pill.className = "pill "+pillClass(pct);
+  renderPoints(store);
+  refreshSheetRow(store);
+  refreshWeeklyRow(store);
+}
+
+function buildSheetHead(){
+  const head = document.getElementById("sheetHead");
+  head.innerHTML = "";
+  const storeTh = document.createElement("th");
+  storeTh.textContent = "Store";
+  head.appendChild(storeTh);
+  KEYS.forEach(k=>{
+    const th = document.createElement("th");
+    th.textContent = k;
+    head.appendChild(th);
+  });
+  const compTh = document.createElement("th");
+  compTh.textContent = "Complimiento";
+  head.appendChild(compTh);
+}
+
+function buildSheetRows(){
+  const body = document.getElementById("sheetBody");
+  body.innerHTML = "";
+  STORES.forEach(store=>{
+    const tr = document.createElement("tr");
+    tr.id = "sheetRow-"+store;
+    const storeTd = document.createElement("td");
+    storeTd.className = "sheetStore";
+    storeTd.textContent = store;
+    tr.appendChild(storeTd);
+    KEYS.forEach((k,i)=>{
+      const td = document.createElement("td");
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "sheetCell-input";
+      input.maxLength = 16;
+      input.title = KEY_GUIDE[k] || "";
+      input.disabled = !(canWrite && editUnlocked);
+      input.addEventListener("change", ()=>{ if(canWrite) setCellValue(store,i,input.value); });
+      input.addEventListener("keydown", (e)=>{ if(e.key==="Enter"){ input.blur(); } });
+      td.appendChild(input);
+      tr.appendChild(td);
+    });
+    const compTd = document.createElement("td");
+    compTd.className = "sheetCompliance";
+    compTd.id = "sheetComp-"+store;
+    tr.appendChild(compTd);
+    body.appendChild(tr);
+  });
+}
+
+function refreshSheetRow(store){
+  const row = document.getElementById("sheetRow-"+store);
+  if(!row) return;
+  KEYS.forEach((k,i)=>{
+    const v = (state[store].marks||{})[i];
+    const input = row.children[i+1].querySelector(".sheetCell-input");
+    if(!input) return;
+    const val = v===undefined ? "" : String(v);
+    if(document.activeElement !== input) input.value = val;
+    input.classList.toggle("is-ok", val.trim()==="1");
+    input.classList.toggle("is-bad", val.trim()==="0");
+  });
+  const comp = document.getElementById("sheetComp-"+store);
+  if(comp) comp.textContent = computeCompliance(store)+"%";
+}
+
+function buildWeeklyHead(){
+  const head = document.getElementById("weeklyHead");
+  head.innerHTML = "";
+  const storeTh = document.createElement("th");
+  storeTh.textContent = "Store";
+  head.appendChild(storeTh);
+  WEEKDAY_LABELS.forEach(d=>{
+    const th = document.createElement("th");
+    th.textContent = d;
+    head.appendChild(th);
+  });
+  const compTh = document.createElement("th");
+  compTh.textContent = "Complimiento";
+  head.appendChild(compTh);
+}
+
+function buildWeeklyRows(){
+  const body = document.getElementById("weeklyBody");
+  body.innerHTML = "";
+  const dates = currentWeekDates();
+  STORES.forEach(store=>{
+    const tr = document.createElement("tr");
+    tr.id = "weekRow-"+store;
+    const storeTd = document.createElement("td");
+    storeTd.className = "sheetStore";
+    storeTd.textContent = store;
+    tr.appendChild(storeTd);
+    for(let i=0;i<7;i++){
+      const td = document.createElement("td");
+      td.className = "weekCell";
+      const dateISO = dates[i];
+      const dayLabel = WEEKDAY_LABELS[i];
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "weekCell-input";
+      input.maxLength = 16;
+      input.title = "Cumplimiento de " + dayLabel;
+      input.disabled = !(canWrite && editUnlocked);
+      input.addEventListener("change", ()=>{ if(canWrite) setWeekCellValue(store, dateISO, input.value); });
+      input.addEventListener("keydown", (e)=>{ if(e.key==="Enter"){ input.blur(); } });
+      td.appendChild(input);
+      tr.appendChild(td);
+    }
+    const compTd = document.createElement("td");
+    compTd.className = "weekCompliance";
+    tr.appendChild(compTd);
+    body.appendChild(tr);
+  });
+  STORES.forEach(refreshWeeklyRow);
+}
+
+async function setWeekCellValue(store, dateISO, rawValue){
+  const trimmed = (rawValue||"").trim();
+  const history = { ...(state[store].history||{}) };
+  if(trimmed === ""){
+    delete history[dateISO];
+  }else{
+    const cleaned = trimmed.replace("%","");
+    const n = parseInt(cleaned, 10);
+    if(!isNaN(n) && String(n) === cleaned){
+      history[dateISO] = Math.max(0, Math.min(100, n));
+    }else{
+      history[dateISO] = trimmed; // texto libre (letras, notas, etc.)
+    }
+  }
+  state[store].history = history;
+  refreshWeeklyRow(store);
+  if(db){
+    try{ await db.collection("stores").doc(store).update({ history }); }
+    catch(e){ /* write failed, value stays local until next successful edit */ }
+  }
+}
+
+function refreshWeeklyRow(store){
+  const row = document.getElementById("weekRow-"+store);
+  if(!row) return;
+  const dates = currentWeekDates();
+  const history = state[store].history || {};
+  const dayPcts = [];
+  dates.forEach((dateISO,i)=>{
+    const td = row.children[i+1];
+    const input = td.querySelector(".weekCell-input");
+    const v = history[dateISO];
+    if(v === undefined || v === null){
+      td.className = "weekCell empty";
+      if(document.activeElement !== input) input.value = "";
+    }else if(typeof v === "number"){
+      td.className = "weekCell has-data";
+      if(document.activeElement !== input) input.value = v+"%";
+      dayPcts.push(v);
+    }else{
+      td.className = "weekCell has-data";
+      if(document.activeElement !== input) input.value = v;
+    }
+  });
+  const compTd = row.children[8];
+  if(dayPcts.length === 0){
+    compTd.className = "weekCompliance empty";
+    compTd.textContent = "0%";
+  }else{
+    const avg = Math.round(dayPcts.reduce((a,b)=>a+b,0)/dayPcts.length);
+    compTd.className = "weekCompliance has-data";
+    compTd.textContent = avg+"%";
+  }
+}
+
+function setupEditLock(){
+  const btn = document.getElementById("editLockBtn");
+  const hint = document.getElementById("editLockHint");
+  const tablesRow = document.getElementById("tablesRow");
+  if(!canWrite) return;
+  tablesRow.classList.add("locked");
+  btn.addEventListener("click", ()=>{
+    editUnlocked = !editUnlocked;
+    btn.textContent = editUnlocked ? "🔓 Edición manual activada" : "🔒 Activar edición manual";
+    btn.classList.toggle("unlocked", editUnlocked);
+    tablesRow.classList.toggle("locked", !editUnlocked);
+    hint.textContent = editUnlocked
+      ? "Escribe letras o números directamente en cualquier celda de las tablas."
+      : "Las tablas están bloqueadas — actívalo para poder escribir en las celdas.";
+    document.querySelectorAll(".sheetCell-input, .weekCell-input").forEach(inp=>{
+      inp.disabled = !editUnlocked;
+    });
+  });
+}
+
+function setupViewToggle(){
+  const cardsBtn = document.getElementById("viewCardsBtn");
+  const tableBtn = document.getElementById("viewTableBtn");
+  const weeklyBtn = document.getElementById("viewWeeklyBtn");
+  const bothBtn = document.getElementById("viewBothBtn");
+  const grid = document.getElementById("storeGrid");
+  const tablesRow = document.getElementById("tablesRow");
+  const tableWrap = document.getElementById("tableWrap");
+  const weeklyWrap = document.getElementById("weeklyWrap");
+
+  function show(which){
+    grid.style.display = which==="cards" ? "" : "none";
+    tablesRow.style.display = (which==="table"||which==="weekly"||which==="both") ? "flex" : "none";
+    tableWrap.style.display = (which==="table"||which==="both") ? "" : "none";
+    weeklyWrap.style.display = (which==="weekly"||which==="both") ? "" : "none";
+    document.getElementById("editLockRow").style.display =
+      (canWrite && which!=="cards") ? "flex" : "none";
+    cardsBtn.classList.toggle("active", which==="cards");
+    tableBtn.classList.toggle("active", which==="table");
+    weeklyBtn.classList.toggle("active", which==="weekly");
+    bothBtn.classList.toggle("active", which==="both");
+  }
+  cardsBtn.addEventListener("click", ()=>show("cards"));
+  tableBtn.addEventListener("click", ()=>show("table"));
+  weeklyBtn.addEventListener("click", ()=>show("weekly"));
+  bothBtn.addEventListener("click", ()=>show("both"));
+  const d = new Date();
+  const txt = d.toLocaleDateString("es-ES",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  document.getElementById("tableDateBar").textContent = txt.charAt(0).toUpperCase()+txt.slice(1);
+}
+
+async function saveMarks(store, marks){
+  state[store].marks = marks;
+  const pct = Math.round((Object.values(marks).filter(v=>String(v).trim()==="1").length/KEYS.length)*100);
+  const history = { ...(state[store].history||{}), [todayISO()]: pct };
+  state[store].history = history;
+
+  refreshCard(store); refreshSummary(); refreshWeeklyRow(store);
+  if(db){
+    try{ await db.collection("stores").doc(store).update({ marks, history }); }
+    catch(e){ setNote(store,"No se pudo guardar el cambio, inténtalo de nuevo.",true); }
+  }
+}
+
+async function cycleMark(store, i){
+  const current = String(state[store].marks[i]||"").trim();
+  const next = current==="1" ? "0" : current==="0" ? undefined : "1";
+  const marks = { ...state[store].marks };
+  if(next===undefined) delete marks[i]; else marks[i]=next;
+  await saveMarks(store, marks);
+}
+
+async function setCellValue(store, i, rawValue){
+  const trimmed = (rawValue||"").trim();
+  const marks = { ...state[store].marks };
+  if(trimmed==="") delete marks[i]; else marks[i]=trimmed;
+  await saveMarks(store, marks);
+}
+
+function setNote(store, msg, isErr){
+  const n = document.getElementById("note-"+store);
+  if(!n) return;
+  n.textContent = msg||"";
+  n.className = "status-note"+(isErr?" err":"");
+}
+
+async function uploadPhoto(store, i, file){
+  if(!assets){ setNote(store,"La carga de fotos no está disponible aquí.",true); return; }
+  setNote(store,"Subiendo foto…");
+  try{
+    const res = await assets.upload(file);
+    const photos = { ...(state[store].photos||{}) };
+    photos[i] = [...(photos[i]||[]), { id:res.id, url:res.url }];
+    state[store].photos = photos;
+
+    // Marca genérica: cualquier punto con foto subida se marca "cumple" automáticamente.
+    const marks = { ...state[store].marks, [i]: "1" };
+    const pct = Math.round((Object.values(marks).filter(v=>String(v).trim()==="1").length/KEYS.length)*100);
+    const history = { ...(state[store].history||{}), [todayISO()]: pct };
+    state[store].marks = marks;
+    state[store].history = history;
+
+    refreshCard(store); refreshSummary();
+    if(db) await db.collection("stores").doc(store).update({ photos, marks, history });
+    setNote(store,"Foto subida y punto marcado como cumple.");
+  }catch(e){
+    setNote(store,"No se pudo subir la foto.",true);
+  }
+}
+
+async function deletePhoto(store, i, id){
+  try{
+    if(assets) await assets.delete(id);
+    const photos = { ...(state[store].photos||{}) };
+    photos[i] = (photos[i]||[]).filter(p=>p.id!==id);
+    state[store].photos = photos;
+
+    // Si ya no queda ninguna foto en ese punto, se quita la marca automática.
+    const marks = { ...state[store].marks };
+    if((photos[i]||[]).length===0) delete marks[i];
+    const pct = Math.round((Object.values(marks).filter(v=>String(v).trim()==="1").length/KEYS.length)*100);
+    const history = { ...(state[store].history||{}), [todayISO()]: pct };
+    state[store].marks = marks;
+    state[store].history = history;
+
+    refreshCard(store); refreshSummary();
+    if(db) await db.collection("stores").doc(store).update({ photos, marks, history });
+  }catch(e){
+    setNote(store,"No se pudo borrar la foto.",true);
+  }
+}
+
+function setupShare(){
+  document.getElementById("shareUrl").textContent = UPLOAD_URL;
+  try{
+    // eslint-disable-next-line no-undef
+    new QRCode(document.getElementById("qrcode"), {
+      text: UPLOAD_URL, width: 144, height: 144,
+      colorDark: "#152847", colorLight: "#ffffff"
+    });
+  }catch(e){ /* library unavailable, share link still works */ }
+
+  document.getElementById("copyBtn").addEventListener("click", async ()=>{
+    const btn = document.getElementById("copyBtn");
+    try{
+      await navigator.clipboard.writeText(UPLOAD_URL);
+      btn.textContent = "¡Copiado!";
+      setTimeout(()=>{ btn.textContent = "Copiar enlace"; }, 1800);
+    }catch(e){ btn.textContent = "No se pudo copiar"; setTimeout(()=>{ btn.textContent = "Copiar enlace"; }, 1800); }
+  });
+
+  document.getElementById("downloadQrBtn").addEventListener("click", async ()=>{
+    const btn = document.getElementById("downloadQrBtn");
+    const canvas = document.querySelector("#qrcode canvas");
+    if(!canvas){ btn.textContent = "QR no disponible"; setTimeout(()=>{ btn.textContent="Descargar QR"; },1800); return; }
+    canvas.toBlob(async (blob)=>{
+      if(!blob) return;
+      if(downloadsCap){
+        try{
+          await downloadsCap.save({ filename: "qr-llaves-entrada-mga-c.png", data: blob });
+        }catch(e){ /* viewer declined or unavailable */ }
+      }else{
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "qr-llaves-entrada-mga-c.png";
+        a.click();
+      }
+    }, "image/png");
+  });
+
+  const dashLink = document.getElementById("dashboardLink");
+  dashLink.href = DASHBOARD_URL;
+  dashLink.target = "_blank";
+  dashLink.rel = "noopener";
+
+  document.getElementById("copyDashboardBtn").addEventListener("click", async ()=>{
+    const btn = document.getElementById("copyDashboardBtn");
+    try{
+      await navigator.clipboard.writeText(DASHBOARD_URL);
+      btn.textContent = "¡Copiado!";
+      setTimeout(()=>{ btn.textContent = "Copiar"; }, 1800);
+    }catch(e){ btn.textContent = "No se pudo"; setTimeout(()=>{ btn.textContent = "Copiar"; }, 1800); }
+  });
+
+  document.getElementById("emailReportBtn").addEventListener("click", ()=>{
+    const btn = document.getElementById("emailReportBtn");
+    const d = new Date();
+    const fecha = d.toLocaleDateString("es-ES",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+    const pcts = STORES.map(s => computeCompliance(s));
+    const avg = Math.round(pcts.reduce((a,b)=>a+b,0)/STORES.length);
+    const allFull = pcts.every(p => p===100);
+
+    const subject = `Reporte de cumplimiento — Llaves de Entrada MGA-C — ${fecha}`;
+
+    let lines = [];
+    lines.push(`Reporte de cumplimiento — Llaves de Entrada MGA-C`);
+    lines.push(fecha.charAt(0).toUpperCase()+fecha.slice(1));
+    lines.push("");
+    lines.push(`Promedio general: ${avg}%${allFull ? " — las 8 tiendas al 100%" : ""}`);
+    lines.push("");
+    STORES.forEach(s=>{
+      const pct = computeCompliance(s);
+      const marks = state[s].marks || {};
+      const faltan = KEYS.filter((k,i)=> String(marks[i]||"").trim() !== "1");
+      lines.push(`${s}: ${pct}%${faltan.length ? "  (faltan: " + faltan.join(", ") + ")" : "  — completo"}`);
+    });
+    lines.push("");
+    lines.push(`Enviado desde: ${DASHBOARD_URL}`);
+    const body = lines.join("\n");
+
+    const mailto = `mailto:cristina.maldonado@ampm.com.ni?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailto;
+
+    btn.textContent = "Abriendo tu correo…";
+    setTimeout(()=>{ btn.textContent = "📧 Enviar reporte por correo"; }, 2200);
+  });
+}
+
+const SELECTED_STORE_KEY = "llaves-entrada-mga-c-selected-store";
+
+function applyUploadOnlyMode(){
+  if(!isUploadOnly) return;
+  document.body.classList.add("upload-only");
+  document.getElementById("subtitle").textContent = "Elige tu tienda y sube la foto de cada punto — se marca solo al subirla";
+  ["shareCard","viewToggle","editLockRow","tablesRow","summaryBar","topNote"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.style.display = "none";
+  });
+
+  let savedStore = null;
+  try{ savedStore = localStorage.getItem(SELECTED_STORE_KEY); }catch(e){ /* storage unavailable */ }
+
+  const selectWrap = document.getElementById("storeSelectWrap");
+  const selectGrid = document.getElementById("storeSelectGrid");
+  const changeBtn = document.getElementById("changeStoreBtn");
+  const grid = document.getElementById("storeGrid");
+
+  function showOnlyStore(store){
+    STORES.forEach(s=>{
+      const card = document.getElementById("card-"+s);
+      if(card) card.style.display = (s===store) ? "" : "none";
+    });
+    selectWrap.style.display = "none";
+    changeBtn.style.display = "none";
+    grid.style.display = "";
+  }
+
+  function showSelector(){
+    grid.style.display = "none";
+    changeBtn.style.display = "none";
+    selectWrap.style.display = "";
+  }
+
+  STORES.forEach(store=>{
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "storeSelectBtn";
+    btn.textContent = store;
+    btn.addEventListener("click", ()=>{
+      try{ localStorage.setItem(SELECTED_STORE_KEY, store); }catch(e){ /* storage unavailable */ }
+      showOnlyStore(store);
+    });
+    selectGrid.appendChild(btn);
+  });
+
+  if(savedStore && STORES.includes(savedStore)){
+    showOnlyStore(savedStore);
+  }else{
+    showSelector();
+  }
+}
+
+function applyDashboardMode(){
+  if(!isDashboardOnly) return;
+  document.body.classList.add("dashboard-only");
+  document.getElementById("subtitle").textContent = "Cumplimiento en vivo — solo lectura";
+  ["shareCard","viewToggle","editLockRow","tablesRow","topNote",
+   "storeSelectWrap","changeStoreBtn","storeGrid"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.style.display = "none";
+  });
+  document.getElementById("dashboardWrap").style.display = "";
+}
+
+async function init(){
+  setDate();
+  setupShare();
+  buildGuideModal();
+  setupViewToggle();
+  buildSheetHead();
+  buildWeeklyHead();
+  const grid = document.getElementById("storeGrid");
+  STORES.forEach(s => grid.appendChild(cardTemplate(s)));
+  applyUploadOnlyMode();
+  applyDashboardMode();
+  STORES.forEach(refreshCard);
+  refreshSummary();
+
+  try{
+    db = await claude.use("db");
+  }catch(e){ db = null; }
+  try{
+    assets = await claude.use("assets");
+  }catch(e){ assets = null; }
+  try{
+    userCap = await claude.use("user");
+  }catch(e){ userCap = null; }
+  try{
+    downloadsCap = await claude.use("downloads");
+  }catch(e){ downloadsCap = null; }
+
+  canUpload = !!assets;
+  assetsChecked = true;
+  canWrite = !!(userCap && userCap.canEdit && userCap.canEdit()) || !!(userCap && userCap.can && userCap.can("data.write")) || !!db;
+  // If we truly can't tell, default to allowing interaction attempts; writes will fail gracefully if not permitted.
+
+  buildSheetRows();
+  buildWeeklyRows();
+  setupEditLock();
+
+  const topNote = document.getElementById("topNote");
+  if(!db){
+    topNote.textContent = "Modo local: los cambios no se comparten entre dispositivos en esta vista.";
+  }else{
+    topNote.textContent = "Los cambios se comparten con quien abra esta página.";
+  }
+
+  STORES.forEach(refreshCard);
+
+  if(db){
+    STORES.forEach(store=>{
+      try{
+        db.collection("stores").doc(store).onSnapshot((doc)=>{
+          if(doc && doc.data){
+            const data = doc.data();
+            state[store].marks = data.marks || {};
+            state[store].photos = data.photos || {};
+            state[store].history = data.history || {};
+            refreshCard(store);
+            refreshSummary();
+          }
+        });
+      }catch(e){ /* snapshot not available, page still works locally */ }
+    });
+  }
+}
+
+init();
+</script>
+</body>
+</html>
